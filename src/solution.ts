@@ -10,15 +10,15 @@ const MAXIMUM_RETRIES = 4
 console.log('Wait')
 LoadCategory().then(categories => {
   return Promise.all(categories
-    // .filter((category, index) => index === 2 || index === 0)
     .map(category => {
       console.log(`Get Category ${category.id}`)
       return GetContents(category)
     }))
 }).then(categories => {
-  console.log('Get Promotions')
   /**
-   * To avoid Error: read ECONNRESET, rather than run as Promise.all(), it's better to run it sequentially
+   * To avoid Error: read ECONNRESET,
+   * rather than run as Promise.all(),
+   * it's better to run it sequentially
    */
   return categories.map(content => GetPromotions(content, MILLISECONDS_WAITING, MAXIMUM_RETRIES))
     .reduce((promiseChain, currentTask) => {

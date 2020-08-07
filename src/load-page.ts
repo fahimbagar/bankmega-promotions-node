@@ -28,18 +28,17 @@ export interface Content {
 
 async function LoadCategory(): Promise<Category[]> {
   const { body } = await RxHR.get(`${BASE_URL}/${PROMO}`).toPromise();
-  // console.log(body)
   let categories: Category[] = [];
-  const map = [];
+  const elements = [];
   const $ = cheerio.load(body);
   $('#subcatpromo').children().each((i, elem) => {
-    map.push(elem.children[0].attribs.id);
+    elements.push(elem.children[0].attribs.id);
   });
   const jsScript = $('#contentpromolain2 > div:nth-child(1) > script')[0].children[0].data;
   const script = jsScript.split('\n');
 
   for (let i = 0; i < script.length; i++) {
-    if (new RegExp(map.join('|')).test(script[i])) {
+    if (new RegExp(elements.join('|')).test(script[i])) {
       categories.push({
         id: new RegExp(/\$\("#(.*?)"\)/).exec(script[i])[1],
         url: new RegExp(/load\("(.*?)"\)/).exec(script[i + 1])[1],
@@ -86,9 +85,12 @@ async function GetContents(category: Category): Promise<Category> {
 }
 
 async function GetPromotions(category: Category, delayTimer: number = 0, maxRetries: number = 1) {
+  console.log(`Start Promotions ${category.id}`)
   const getData$ = category.contents.map(content => {
     return RxHR.get(content.url).pipe(
-      map(data => data.response.statusCode === 200 ? data : throwError('success was false')),
+      map(data => {
+        return data.response.statusCode === 200 ? data : throwError('success was false')
+      }),
       retryWhen(err => err.pipe(delay(delayTimer), take(maxRetries)))
     );
   });
@@ -106,6 +108,7 @@ async function GetPromotions(category: Category, delayTimer: number = 0, maxRetr
     const image = ket.find('img')[0].attribs.src as string;
     category.contents[index].information = image.startsWith('http') ? image : `${BASE_URL}${image}`;
   });
+  console.log(`End Promotions ${category.id}`)
   return category;
 }
 
