@@ -1,6 +1,7 @@
-import { forkJoin } from 'rxjs';
+import { forkJoin, throwError } from 'rxjs';
 import axios from 'axios';
 import { RxHR, RxHttpRequestResponse } from '@akanass/rx-http-request';
+import { delay, map, retryWhen, take } from 'rxjs/operators';
 
 const AxiosInstance = axios.create();
 const cheerio = require('cheerio');
@@ -84,9 +85,12 @@ async function GetContents(category: Category): Promise<Category> {
   return category;
 }
 
-async function GetPromotions(category: Category) {
+async function GetPromotions(category: Category, delayTimer: number = 0, maxRetries: number = 1) {
   const getData$ = category.contents.map(content => {
-    return RxHR.get(content.url);
+    return RxHR.get(content.url).pipe(
+      map(data => data.response.statusCode === 200 ? data : throwError('success was false')),
+      retryWhen(err => err.pipe(delay(delayTimer), take(maxRetries)))
+    );
   });
   const responses = await forkJoin([...getData$]).toPromise();
   responses.forEach((r: RxHttpRequestResponse, index) => {
