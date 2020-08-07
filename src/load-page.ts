@@ -3,7 +3,6 @@ import axios from 'axios';
 import { RxHR, RxHttpRequestResponse } from '@akanass/rx-http-request';
 import { delay, map, retryWhen, take } from 'rxjs/operators';
 
-const AxiosInstance = axios.create();
 const cheerio = require('cheerio');
 
 const BASE_URL = 'https://www.bankmega.com';
@@ -23,7 +22,7 @@ export interface Content {
   area?: string
   period?: string
   information?: string
-  file?: string
+  redirect?: string
 }
 
 async function LoadCategory(): Promise<Category[]> {
@@ -102,8 +101,8 @@ async function GetPromotions(category: Category, delayTimer: number = 0, maxRetr
     category.contents[index].period = $('#contentpromolain2 > div.periode').text().replace(/(\r\n|\n|\r|\t)/gm, '').replace('Periode Promo : ', '');
     const ket = $('#contentpromolain2 > div.keteranganinside');
     if (ket.find('a').length > 0) {
-      const file = ket.find('a')[0].attribs.href as string;
-      category.contents[index].file = file.startsWith('http') ? file : `${BASE_URL}/${file}`;
+      const redirect = ket.find('a')[0].attribs.href as string;
+      category.contents[index].redirect = redirect.startsWith('http') ? redirect : `${BASE_URL}/${redirect}`;
     }
     const image = ket.find('img')[0].attribs.src as string;
     category.contents[index].information = image.startsWith('http') ? image : `${BASE_URL}${image}`;

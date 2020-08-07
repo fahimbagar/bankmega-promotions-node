@@ -37,7 +37,7 @@ describe('- main.test.ts file', () => {
       expect(category.contents[0].area).toBeUndefined()
       expect(category.contents[0].period).toBeUndefined()
       expect(category.contents[0].information).toBeUndefined()
-      expect(category.contents[0].file).toBeUndefined()
+      expect(category.contents[0].redirect).toBeUndefined()
       done()
     })
   });
@@ -59,7 +59,7 @@ describe('- main.test.ts file', () => {
       expect(category.contents[0].area).toBeDefined()
       expect(category.contents[0].period).toBeDefined()
       expect(category.contents[0].information.startsWith('http')).toBeTruthy()
-      expect(category.contents[0].file).toBeUndefined()
+      expect(category.contents[0].redirect).toBeUndefined()
 
       expect(category.contents[2].title).toBeDefined()
       expect(category.contents[2].image).toBeDefined()
@@ -67,7 +67,7 @@ describe('- main.test.ts file', () => {
       expect(category.contents[2].area).toBeDefined()
       expect(category.contents[2].period).toBeDefined()
       expect(category.contents[2].information.startsWith('http')).toBeTruthy()
-      expect(category.contents[2].file.startsWith('http')).toBeTruthy()
+      expect(category.contents[2].redirect.startsWith('http')).toBeTruthy()
       done()
     })
   });
