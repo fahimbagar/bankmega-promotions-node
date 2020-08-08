@@ -25,6 +25,10 @@ export interface Content {
   redirect?: string
 }
 
+/**
+ * Get all category from page https://www.bankmega.com/promolainnya.php
+ * @constructor
+ */
 async function LoadCategory(): Promise<Category[]> {
   const { body } = await RxHR.get(`${BASE_URL}/${PROMO}`).toPromise();
   let categories: Category[] = [];
@@ -36,6 +40,9 @@ async function LoadCategory(): Promise<Category[]> {
   const jsScript = $('#contentpromolain2 > div:nth-child(1) > script')[0].children[0].data;
   const script = jsScript.split('\n');
 
+  /**
+   *  Get each category links using Regex
+   */
   for (let i = 0; i < script.length; i++) {
     if (new RegExp(elements.join('|')).test(script[i])) {
       categories.push({
@@ -51,6 +58,11 @@ async function LoadCategory(): Promise<Category[]> {
   return categories;
 }
 
+/**
+ * Get maximum pages from each category
+ * @param category
+ * @constructor
+ */
 async function GetPages(category: Category): Promise<Category> {
   const { body } = await RxHR.get(`${BASE_URL}/${category.url}`).toPromise();
   const $ = cheerio.load(body);
@@ -59,6 +71,11 @@ async function GetPages(category: Category): Promise<Category> {
   return category;
 }
 
+/**
+ * Get contents link/url from each category and return as Promise
+ * @param category
+ * @constructor
+ */
 async function GetContents(category: Category): Promise<Category> {
   const getContents$ = [];
   for (let i = 1; i <= category.pages; i++) {
@@ -83,6 +100,13 @@ async function GetContents(category: Category): Promise<Category> {
   return category;
 }
 
+/**
+ * Crawl promotions from each category
+ * @param category
+ * @param delayTimer delay every request after thrown error
+ * @param maxRetries maximum retries after request error
+ * @constructor
+ */
 async function GetPromotions(category: Category, delayTimer: number = 0, maxRetries: number = 1) {
   console.log(`Start Promotions ${category.id}`)
   const getData$ = category.contents.map(content => {
